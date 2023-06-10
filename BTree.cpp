@@ -6,6 +6,13 @@
 #include "BTREE.h"
 
 
+// getters
+int BTree::getsize() { return size; }
+int BTree::getKeyCount() { return keyCount; }
+int BTree::getnodeCount() { return nodeCount; }
+int BTree::getHeight() { return height; }
+
+
 node* BTree::initNode() {
     node* n = new node;
     nodeCount++;
@@ -31,6 +38,15 @@ BTree::~BTree() {
 }
 
 
+void BTree::cleanup(node* r) {
+
+    for(auto c: r->children) { // recurse to leaf
+        cleanup(c);
+    }
+    delete r; // delete current node
+}
+
+
 void BTree::insert(int k) {
     
     node* r = root;
@@ -50,7 +66,6 @@ void BTree::insert(int k) {
         insertNonfull(r, k);
     }
     keyCount++;
-    std::cout << "inserted " << k << std::endl;
 }
 
 
@@ -68,11 +83,13 @@ void BTree::insertNonfull(node* x, int k) {
         int i = 0;
 
         while(iter != stop && *iter < k) { // traverse
-            std::cout << *iter << " ";
             iter++;
             i++;
         }
-        std::cout << "\nkeys[" << --i << "]: " << *(--iter) << std::endl;
+
+        // prev while loop will go +1 past the end of the keys
+        i--;
+        iter--;
 
         if(x->isLeaf) {
             
@@ -87,8 +104,6 @@ void BTree::insertNonfull(node* x, int k) {
         else {
             
             if(*iter < k) i++;
-            std::cout << "Iter val: " << *iter << std::endl; 
-            std::cout << "Child: " << i << std::endl;
 
             if(x->children[i]->nKeys == 2 * size - 1) {
                 
@@ -141,15 +156,6 @@ bool BTree::search(node* x, int k) {
     if(x->isLeaf) return false;
     
     return search(x->children[i], k);
-}
-
-
-void BTree::cleanup(node* r) {
-
-    for(auto c: r->children) { // recurse to leaf
-        cleanup(c);
-    }
-    delete r; // delete current node
 }
 
 
@@ -220,5 +226,41 @@ void BTree::printNodesHelper(node* n, int depth) {
 }
 
 
+std::vector<int> BTree::getKeys() {
+
+    std::vector<int> keys;
+
+    if(root->nKeys != 0) {
+
+        auto temp = getKeysHelper(root);
+        keys.insert(keys.end(), temp.begin(), temp.end());
+    }
+
+    return keys;
+}
+
+std::vector<int> BTree::getKeysHelper(node* n) {
+    
+    std::vector<int> keys;
+
+    if(n->children.size() != 0) { // leaf node
+
+        auto temp = getKeysHelper(n->children[0]);
+        keys.insert(keys.end(), temp.begin(), temp.end()); // insert left subtree
+
+        for(int i = 1; i < n->children.size(); i++) {
+            
+            keys.push_back(n->keys[i - 1]); // insert key between children
+            
+            auto temp = getKeysHelper(n->children[i]);
+            keys.insert(keys.end(), temp.begin(), temp.end()); // insert right subtree
+        }
+    }
+    else {
+        keys.insert(keys.end(), n->keys.begin(), n->keys.end()); // insert all keys if leaf node
+    }
+
+    return keys;
+}
 
 #endif

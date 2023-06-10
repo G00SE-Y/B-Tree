@@ -26,6 +26,7 @@ class BTree {
         void insertNonfull(node* x, int k);
         void printHelper(node* n);
         void printNodesHelper(node* n, int depth);
+        std::vector<int> getKeysHelper(node* n);
 
     public:
 
@@ -36,5 +37,10 @@ class BTree {
         bool search(node* x, int k);
         void printInOrder();
         void printNodes();
-        
+
+        int getsize();
+        int getKeyCount();
+        int getnodeCount();
+        int getHeight();
+        std::vector<int> getKeys();        
 };
