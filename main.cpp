@@ -6,10 +6,12 @@
 
 #include "BTree.h"
 
-#define TEST_MIN_KEYS 100
+// This script takes a while
+
+#define TEST_MIN_KEYS 1000000
 #define TEST_MAX_KEYS 1000000 // 1,000,000
 #define TEST_MIN_DEGREE 2
-#define TEST_MAX_DEGREE 1000 // 1,000
+#define TEST_MAX_DEGREE 100 // 1,000
 
 #define SEED 0
 #define N_RAND_TESTS 100
@@ -26,28 +28,35 @@ int main(void) {
     srand(SEED);
 
     int fails = 0;
+    int tests = 0;
     std::cout << std::endl;
 
+    tests++;
     if(!ordered_test(1, 10, 2, "basic_test(1)")) {
         fails++;
     }
 
+    tests++;
     if(!ordered_test(1, 20, 2, "basic_test(2)")) {
         fails++;
     }
 
+    tests++;
     if(!ordered_test(1, 10, 3, "basic_test(3)")) {
         fails++;
     }
 
+    tests++;
     if(!ordered_test(1, 20, 3, "basic_test(4)")) {
         fails++;
     }
 
+    tests++;
     if(!ordered_test(1, 100, 3, "basic_test(5)")) {
         fails++;
     }
 
+    tests++;
     if(!ordered_test(1, 10000, 10, "not_so_basic_test")) {
         fails++;
     }
@@ -55,14 +64,15 @@ int main(void) {
     int n, d;
     std::string s = "Random_Test(", ts;
 
-    for(int i = 0; i < 1 /* N_RAND_TESTS */; i++) {
+    for(int i = 0; i < N_RAND_TESTS; i++) {
 
-        n = (rand() + TEST_MIN_KEYS) % TEST_MAX_KEYS;
-        d = (rand() + TEST_MIN_DEGREE) % TEST_MAX_DEGREE;
+        n = (rand() + TEST_MIN_KEYS) % TEST_MAX_KEYS; // number of keys
+        d = (rand() + TEST_MIN_DEGREE) % TEST_MAX_DEGREE; // degree of btree
 
         ts = s + std::to_string(i + 1) + ")";
-
-        if(!rand_test(1, TEST_MAX_KEYS, d, n, ts)) fails++;
+        
+        tests++;
+        if(!rand_test(1, TEST_MAX_KEYS, TEST_MAX_DEGREE, TEST_MAX_KEYS, ts)) fails++;
     }
 
 
@@ -71,7 +81,7 @@ int main(void) {
         std::cout << "All cases passed!" << std::endl;
     }
     else {
-        std::cout << "Failed " << fails << " cases...\n" << std::endl;
+        std::cout << "Failed " << fails  << "/" << tests << " cases...\n" << std::endl;
     }
     
     return 0;
@@ -82,6 +92,8 @@ bool check_height(int t, int h, int n) {
 
     int h_min = ceil(log(n + 1) / log(2 * t));
     int h_max = floor(log((n + 1) / 2) / log(t)) + 1;
+
+    // std::cout << "Expected " << h_min << " <= H <= " << h_max << std::endl;
 
     if(h_min <= h && h <= h_max) return true;
     else return false;
@@ -138,8 +150,11 @@ bool ordered_test(int low, int high, int deg, std::string name) {
     std::cout << err << std::endl;
 
     if(res) {
-        std::cout << "Passed!\n" << std::endl;
+        std::cout << "\tPassed!\n" << std::endl;
     }
+
+    // t.printInOrder();
+    // t.printNodes();
 
     return res;
 }
@@ -158,13 +173,13 @@ bool rand_test(int low, int high, int deg, int num, std::string name) {
 
         r = (rand() + low) % high;
 
-        std::cout << "(" << i << ") " << r << " " << std::endl;
+        // std::cout << "(" << i << ") " << r << " " << std::endl;
 
         v.push_back(r);
         t.insert(r);
     }
 
-    std::cout << "helloo" << std::endl;
+    // std::cout << "helloo" << std::endl;
 
     std::sort(v.begin(), v.end());
 
@@ -192,7 +207,7 @@ bool rand_test(int low, int high, int deg, int num, std::string name) {
     std::cout << err << std::endl;
 
     if(res) {
-        std::cout << "Passed!\n" << std::endl;
+        std::cout << "\tPassed!\n" << std::endl;
     }
 
     return res;

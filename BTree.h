@@ -1,9 +1,11 @@
+#ifndef BTREE_H
+#define BTREE_H
+
 #include <vector>
 
 typedef struct Node {
     
-    bool isLeaf; // is this node a leaf or not
-    int nKeys; // number of keys in node
+    bool isLeaf; // true -> leaf node ; false -> internal node
     std::vector<int> keys;
     std::vector<struct Node*> children; // pointers to children nodes
     
@@ -20,16 +22,16 @@ class BTree {
 
         node* root; // root node of the tree
 
-        node* initNode();
-        void cleanup(node* r);
-        void splitChild(node* x, int i, node* y);
-        void insertNonfull(node* x, int k);
-        void printHelper(node* n);
-        void printNodesHelper(node* n, int depth);
-        std::vector<int> getKeysHelper(node* n);
+        node* initNode(); // create default node
+        void cleanup(node* r); // free up all tree nodes
+        void splitChild(node* x, int i, node* y); // turn an overfull node into a subtree
+        void insertNonfull(node* x, int k); // insert normally
+
+        void printHelper(node* n); // debug method
+        void printNodesHelper(node* n, int depth); // debug method
+        std::vector<int> getKeysHelper(node* n); // debug method
 
     public:
-
 
         BTree(int branchFactor);
         ~BTree();
@@ -42,5 +44,7 @@ class BTree {
         int getKeyCount();
         int getnodeCount();
         int getHeight();
-        std::vector<int> getKeys();        
+        std::vector<int> getKeys();       
 };
+
+#endif
