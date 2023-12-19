@@ -45,7 +45,7 @@ void BTree::cleanup(node* r) {
 
 
 void BTree::insert(int k) {
-    // std::cout << "Inserting " << k << ". ";
+
     node* r = root;
 
     if(root->keys.size() == 2 * size - 1) { // root is full
@@ -57,9 +57,7 @@ void BTree::insert(int k) {
         s->isLeaf = false;
         s->children.push_back(r);
 
-        // std::cout << "Splitting Child... ";
         splitChild(s, 0, r);
-        // std::cout << "Child Split." << std::endl;
         insertNonfull(s, k);
 
         height++;
@@ -68,16 +66,10 @@ void BTree::insert(int k) {
         insertNonfull(r, k);
     }
     keyCount++;
-
-    // printInOrder();
 }
 
 
 void BTree::insertNonfull(node* x, int k) {
-    
-    // std::cout << "Trying to insert " << k << " into [ ";
-    // for(auto i: x->keys) std::cout << i << " ";
-    // std::cout<< "]" << std::endl;
 
     auto it = x->keys.begin();
     auto begin = x->keys.begin();
@@ -92,7 +84,6 @@ void BTree::insertNonfull(node* x, int k) {
     else {
     
         int i = std::distance(begin, it);
-        // std::cout << "Moving into child at " << i << std::endl;
 
         if(x->children[i]->keys.size() == 2 * size - 1) {
 
@@ -110,10 +101,6 @@ void BTree::splitChild(node* x, int i, node* y) {
 
     node* z = initNode();
 
-    // std::cout << "Before split: i:" << i << " [ ";
-    // for(auto i: y->keys) std::cout << i << " ";
-    // std::cout << "]" << std::endl;
-
     z->isLeaf = y->isLeaf;
     z->keys.insert(z->keys.begin(), y->keys.begin() + size, y->keys.end()); // copy right half of node y's keys onto node z
     y->keys.erase(y->keys.begin() + size, y->keys.end()); // delete copies from y
@@ -126,18 +113,46 @@ void BTree::splitChild(node* x, int i, node* y) {
     x->children.insert(x->children.begin() + i + 1, z);
     x->keys.insert(x->keys.begin() + i, y->keys.back());
     y->keys.pop_back();
-
-    // std::cout << "Sanity: [ ";
-    // for(auto i: y->keys) std::cout << i << " ";
-    // std::cout << "]  " << x->keys[i] << "  [ ";
-    // for(auto i: z->keys) std::cout << i << " ";
-    // std::cout << "]" << std::endl;
 }
 
 
-bool BTree::search(node* x, int k) {
+bool BTree::contains(int k) {
+    return contains(root, k);
+}
 
-    return false;
+
+bool BTree::contains(node* x, int k) {
+
+    int l = 0;
+    int r = x->keys.size() - 1;
+    int m;
+    while(l <= r && l >= 0 && r < x->keys.size()) { // binary search
+        m = l + (r - l) / 2;
+        
+        // std::cout << "from " << l << " to " << r << ":  keys[" << m << "] = " << x->keys[m] << std::endl;
+
+        if(x->keys[m] == k) return true; // found
+
+        if(x->keys[m] > k) {
+            r = m - 1;
+        }
+        else {
+            l = m + 1;
+        }
+    }
+
+    // if leaf, don't traverse anymore
+    if(x->isLeaf) return false;
+
+    // internal node, find child to traverse to
+    if(k < x->keys[m]) {
+        // std::cout << "Traversing to child at " << m << std::endl;
+        return contains(x->children[m], k); // left child
+    }
+    else  {
+        // std::cout << "Traversing to child at " << m + 1 << std::endl;
+        return contains(x->children[m + 1], k); // right child
+    }
 }
 
 

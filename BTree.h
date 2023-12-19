@@ -26,6 +26,7 @@ class BTree {
         void cleanup(node* r); // free up all tree nodes
         void splitChild(node* x, int i, node* y); // turn an overfull node into a subtree
         void insertNonfull(node* x, int k); // insert normally
+        bool contains(node* x, int k); // recursively find key with binary search
 
         void printHelper(node* n); // debug method
         void printNodesHelper(node* n, int depth); // debug method
@@ -36,7 +37,8 @@ class BTree {
         BTree(int branchFactor);
         ~BTree();
         void insert(int k);
-        bool search(node* x, int k);
+        bool contains(int k);
+
         void printInOrder();
         void printNodes();
 

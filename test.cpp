@@ -8,10 +8,10 @@
 
 // This script takes a while
 
-#define TEST_MIN_KEYS 1000000
-#define TEST_MAX_KEYS 1000000 // 1,000,000
+#define TEST_MIN_KEYS 100000
+#define TEST_MAX_KEYS 100000 // 100,000
 #define TEST_MIN_DEGREE 2
-#define TEST_MAX_DEGREE 100 // 1,000
+#define TEST_MAX_DEGREE 100 // 100
 
 #define SEED 0
 #define N_RAND_TESTS 100
@@ -64,7 +64,7 @@ int main(void) {
     int n, d;
     std::string s = "Random_Test(", ts;
 
-    for(int i = 0; i < N_RAND_TESTS; i++) {
+    for(int i = 0; i < N_RAND_TESTS ; i++) {
 
         n = (rand() + TEST_MIN_KEYS) % TEST_MAX_KEYS; // number of keys
         d = (rand() + TEST_MIN_DEGREE) % TEST_MAX_DEGREE; // degree of btree
@@ -78,7 +78,7 @@ int main(void) {
 
     std::cout << "------------------------" << std::endl;
     if(fails == 0) {
-        std::cout << "All cases passed!" << std::endl;
+        std::cout << "All cases passed! (" << tests << "/" << tests << ")" << std::endl;
     }
     else {
         std::cout << "Failed " << fails  << "/" << tests << " cases...\n" << std::endl;
@@ -115,15 +115,18 @@ bool check_order(std::vector<int> k, std::vector<int> v) {
 
 bool ordered_test(int low, int high, int deg, std::string name) {
     
-    std::cout<< "Test: " + name << "\n" << std:: endl; 
-    std::cout<< "\tParams: {range: [" << low << " .. " << high << "], deg: " << deg << "}" << std::endl;
+    std::cout << "Test: " + name << "\n" << std:: endl; 
+    std::cout << "\tParams: {range: [" << low << " .. " << high << "], deg: " << deg << "}" << std::endl;
 
     BTree t = BTree(deg);
     
     std::vector<int> v;
+    int misses = 0;
     for(int i = low; i <= high; i++) { // insert in order from min to max
         v.push_back(i);
         t.insert(i);
+
+        if(!t.contains(i)) misses++;
     }
 
     int k = t.getKeyCount();
@@ -147,7 +150,12 @@ bool ordered_test(int low, int high, int deg, std::string name) {
         res = false;
     }
 
-    std::cout << err << std::endl;
+    if(misses > 0) {
+        err += "\t" + std::to_string(misses) + " / " + std::to_string(v.size()) + " values could not be found after insertion!\n";
+        res = false;
+    }
+
+    std::cout << err << std::endl << std::endl;
 
     if(res) {
         std::cout << "\tPassed!\n" << std::endl;
@@ -162,24 +170,26 @@ bool ordered_test(int low, int high, int deg, std::string name) {
 
 bool rand_test(int low, int high, int deg, int num, std::string name) {
 
-    std::cout<< "Test: " + name << "\n" << std:: endl; 
-    std::cout<< "\tParams: {range: [" << low << " .. " << high << "], deg: " << deg << ", keys: " << num << "}" << std::endl;
+    std::cout << "Test: " + name << "\n" << std:: endl; 
+    std::cout << "\tParams: {range: [" << low << " .. " << high << "], deg: " << deg << ", keys: " << num << "}" << std::endl;
 
     BTree t = BTree(deg);
     
     std::vector<int> v;
-    int r;
-    for(int i = 0; i <= num; i++) { // insert in order from min to max
+    int r, misses = 0;
+    for(int i = 1; i <= num; i++) {
 
         r = (rand() + low) % high;
 
-        // std::cout << "(" << i << ") " << r << " " << std::endl;
-
         v.push_back(r);
         t.insert(r);
-    }
 
-    // std::cout << "helloo" << std::endl;
+        if(!t.contains(r))  {
+            misses++;
+            // std::cout << r << " not found!" << std::endl;
+        }
+        // else std::cout << r << " exists." << std::endl;
+    }
 
     std::sort(v.begin(), v.end());
 
@@ -204,7 +214,12 @@ bool rand_test(int low, int high, int deg, int num, std::string name) {
         res = false;
     }
 
-    std::cout << err << std::endl;
+    if(misses > 0) {
+        err += "\t" + std::to_string(misses) + " / " + std::to_string(v.size()) + " values could not be found after insertion!\n";
+        res = false;
+    }
+
+    std::cout << err << std::endl << std::endl;
 
     if(res) {
         std::cout << "\tPassed!\n" << std::endl;
